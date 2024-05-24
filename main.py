@@ -2,9 +2,12 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 def check_url():
-    url = 'https://en.autoplius.lt/ads/used-cars?make_id_list=&engine_capacity_from=&engine_capacity_to=&power_from=&power_to=&kilometrage_from=&kilometrage_to=&has_damaged_id=&condition_type_id=&make_date_from=2000&make_date_to=2014&sell_price_from=&sell_price_to=20000&fuel_id%5B30%5D=30&body_type_id%5B1%5D=1&co2_from=&co2_to=&euro_id=&fk_place_countries_id=&qt=&number_of_doors_id=&gearbox_id=37&steering_wheel_id=&is_partner=&older_not=&save_search=1&slist=2294798814&category_id=2&order_by=3&order_direction=DESC'
+    url = 'https://www.autoscout24.com/lst?atype=C&body=3&cy=D%2CA%2CB%2CE%2CF%2CI%2CL%2CNL&damaged_listing=exclude&desc=1&doorfrom=2&doorto=3&fregfrom=2000&fregto=2014&fuel=B&gear=M&powerfrom=132&powertype=hp&priceto=12500&search_id=d8i3umblu0&sort=age&source=detailsearch&ustate=N%2CU'
 
     options = Options()
     options.add_argument('--headless')  # Run Chrome in headless mode (no GUI)
@@ -17,6 +20,11 @@ def check_url():
 
     try:
         driver.get(url)
+
+        # Wait until the document is ready
+        WebDriverWait(driver, 20).until(lambda d: d.execute_script('return document.readyState') == 'complete')
+
+
         print("Successfully connected to the website. Status code:", driver.execute_script("return document.readyState;"))
 
         # Print the page source (HTML content)
