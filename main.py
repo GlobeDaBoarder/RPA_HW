@@ -53,12 +53,17 @@ def populate_cache():
             }
 
             if car_url in cache:
-                print("Found a duplicate URL in the cache. Stopping the process.")
-                return False
+                if cache[car_url] != car_details:
+                    # Check if any details have changed
+                    cache[car_url] = car_details
+                    print(f"Updated car in cache: {car_url} with new details: {car_details}")
+                else:
+                    print(f"No changes detected for {car_url}.")
             else:
                 cache[car_url] = car_details
                 print(f"Added car to cache: {car_url} with details: {car_details}")
-        print("All unique car details have been added to the cache.")
+
+        print("All processed car details have been added or updated in the cache.")
         return True
     except Exception as e:
         print(f"An error occurred while populating the cache: {e}")
@@ -94,7 +99,7 @@ def main():
         while True:
             if not check_url():
                 break
-            time.sleep(5)  # Wait for 5 seconds before the next call
+            time.sleep(10)  # Wait for 5 seconds before the next call
     finally:
         driver.quit()  # Ensure the driver is quit when the script ends
         # Print all entries in the cache
