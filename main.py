@@ -8,7 +8,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 import json
 
-
 # Global cache to store URLs of car listings
 cache = {}
 
@@ -21,10 +20,12 @@ options.add_argument('--disable-dev-shm-usage')
 
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
+
 def save_cache():
     with open('car_cache.json', 'w') as f:
         json.dump(cache, f)
     print("Cache saved successfully.")
+
 
 def load_cache():
     try:
@@ -55,6 +56,7 @@ def retrieve_car_listing():
 
 def populate_cache():
     """Populates the cache with car data from the page content."""
+    is_something_added_or_updated = False
     try:
         car_listings = retrieve_car_listing()
         for listing in car_listings:
@@ -73,17 +75,20 @@ def populate_cache():
                     # Check if any details have changed
                     cache[car_url] = car_details
                     print(f"Updated car in cache: {car_url} with new details: {car_details}")
+                    is_something_added_or_updated = True
                 else:
                     print(f"No changes detected for {car_url}.")
             else:
                 cache[car_url] = car_details
                 print(f"Added car to cache: {car_url} with details: {car_details}")
+                is_something_added_or_updated = True
 
-        print("All processed car details have been added or updated in the cache.")
-        return True
+        if is_something_added_or_updated:
+            save_cache()
+
+        print("Reviewing cars in the page done")
     except Exception as e:
         print(f"An error occurred while populating the cache: {e}")
-        return False
 
 
 def check_url():
@@ -113,7 +118,6 @@ def main():
         while True:
             if not check_url():
                 break
-            save_cache()
             time.sleep(10)  # Wait for 5 seconds before the next call
     finally:
         driver.quit()  # Ensure the driver is quit when the script ends
