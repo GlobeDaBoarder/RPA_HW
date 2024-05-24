@@ -57,12 +57,28 @@ def populate_cache():
 
 
 def check_url():
-    """Coordinates fetching the page content and populating the cache."""
-    url = 'https://www.autoscout24.com/lst?atype=C&body=3&cy=D%2CA%2CB%2CE%2CF%2CI%2CL%2CNL&damaged_listing=exclude&desc=1&doorfrom=2&doorto=3&fregfrom=2000&fregto=2014&fuel=B&gear=M&powerfrom=132&powertype=hp&priceto=12500&search_id=d8i3umblu0&sort=age&source=detailsearch&ustate=N%2CU'
+    """Coordinates fetching the page content and populating the cache with pagination handling."""
+    base_url = 'https://www.autoscout24.com/lst/toyota?atype=C&body=3&cy=D%2CA%2CB%2CE%2CF%2CI%2CL%2CNL&damaged_listing=exclude&desc=1&doorfrom=2&doorto=3&fregfrom=2000&fregto=2014&fuel=B&gear=M&mmmv=52%7C%7C%7C&powerfrom=132&powertype=hp&priceto=20000&search_id=r5u8n2wic8&sort=age&source=listpage_pagination&ustate=N%2CU&page='
+    page_number = 1
 
-    if establish_driver_connection(url):
-        return populate_cache()
-    return False
+    while True:
+        url = f"{base_url}{page_number}"
+        if not establish_driver_connection(url):
+            return False
+
+        car_listings = retrieve_car_listing()
+        if not car_listings:
+            print("No more listings found on page", page_number)
+            return True
+
+        has_new_content = populate_cache()
+        if not has_new_content:
+            print("Duplicate found. Stopping the process.")
+            return False
+
+        page_number += 1
+        print(f"Moving to page {page_number}")
+
 
 
 def main():
