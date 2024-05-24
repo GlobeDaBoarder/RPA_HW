@@ -1,16 +1,28 @@
-import requests
-from time import sleep
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
 
 def check_url():
-    url = 'https://www.autoscout24.com/lst?atype=C&body=3&cy=D%2CA%2CB%2CE%2CF%2CI%2CL%2CNL&damaged_listing=exclude&desc=1&doorfrom=2&doorto=3&fregfrom=2000&fregto=2014&fuel=B&gear=M&powerfrom=132&powertype=hp&priceto=12500&search_id=d8i3umblu0&sort=age&source=detailsearch&ustate=N%2CU'
+    url = 'https://en.autoplius.lt/ads/used-cars?make_id_list=&engine_capacity_from=&engine_capacity_to=&power_from=&power_to=&kilometrage_from=&kilometrage_to=&has_damaged_id=&condition_type_id=&make_date_from=2000&make_date_to=2014&sell_price_from=&sell_price_to=20000&fuel_id%5B30%5D=30&body_type_id%5B1%5D=1&co2_from=&co2_to=&euro_id=&fk_place_countries_id=&qt=&number_of_doors_id=&gearbox_id=37&steering_wheel_id=&is_partner=&older_not=&save_search=1&slist=2294798814&category_id=2&order_by=3&order_direction=DESC'
 
-    response = requests.get(url)
+    options = Options()
+    options.add_argument('--headless')  # Run Chrome in headless mode (no GUI)
+    options.add_argument('--disable-gpu')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
 
-    if response.status_code == 200:
-        print("Successfully connected to the website. Status code:", response.status_code)
-        print(response.text)
-    else:
-        print("Failed to connect. Status code:", response.status_code)
+    # Set up the Chrome driver
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
+    try:
+        driver.get(url)
+        print("Successfully connected to the website. Status code:", driver.execute_script("return document.readyState;"))
+
+        # Print the page source (HTML content)
+        print(driver.page_source)
+    finally:
+        driver.quit()
 
 if __name__ == "__main__":
     check_url()
