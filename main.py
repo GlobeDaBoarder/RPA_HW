@@ -6,6 +6,8 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
+import json
+
 
 # Global cache to store URLs of car listings
 cache = {}
@@ -18,6 +20,20 @@ options.add_argument('--no-sandbox')
 options.add_argument('--disable-dev-shm-usage')
 
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
+def save_cache():
+    with open('car_cache.json', 'w') as f:
+        json.dump(cache, f)
+    print("Cache saved successfully.")
+
+def load_cache():
+    try:
+        with open('car_cache.json', 'r') as f:
+            global cache
+            cache = json.load(f)
+        print("Cache loaded successfully.")
+    except FileNotFoundError:
+        print("No cache file found. Starting with an empty cache.")
 
 
 def establish_driver_connection(url):
@@ -85,10 +101,7 @@ def check_url():
             print("No more listings found on page", page_number)
             return True
 
-        has_new_content = populate_cache()
-        if not has_new_content:
-            print("Duplicate found. Stopping the process.")
-            return False
+        populate_cache()
 
         page_number += 1
         print(f"Moving to page {page_number}")
@@ -96,13 +109,14 @@ def check_url():
 
 def main():
     try:
+        load_cache()
         while True:
             if not check_url():
                 break
+            save_cache()
             time.sleep(10)  # Wait for 5 seconds before the next call
     finally:
         driver.quit()  # Ensure the driver is quit when the script ends
-        # Print all entries in the cache
 
 
 if __name__ == "__main__":
