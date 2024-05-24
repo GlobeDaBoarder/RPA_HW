@@ -22,9 +22,14 @@ driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), opti
 
 
 def save_cache():
-    with open('car_cache.json', 'w') as f:
-        json.dump(cache, f)
-    print("Cache saved successfully.")
+    try:
+        with open('car_cache.json', 'w') as f:
+            json.dump(cache, f, indent=4)  # Set indent level to 4 spaces
+        print("Cache saved successfully.")
+    except IOError as e:
+        print(f"Failed to save cache: {e}")
+    except TypeError as e:
+        print(f"Data type not serializable: {e}")
 
 
 def load_cache():
