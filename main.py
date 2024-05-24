@@ -8,7 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Global cache to store URLs of car listings
-cache = set()
+cache = {}
 
 # Initialize the Chrome driver outside of the function to keep it alive
 options = Options()
@@ -38,18 +38,27 @@ def retrieve_car_listing():
 
 
 def populate_cache():
-    """Populates the cache with URLs from the page content."""
+    """Populates the cache with car data from the page content."""
     try:
         car_listings = retrieve_car_listing()
         for listing in car_listings:
             car_url = listing.find_element(By.TAG_NAME, 'a').get_attribute('href')
+            car_details = {
+                'name': listing.find_element(By.CSS_SELECTOR, 'h2').text,
+                'price': listing.find_element(By.CSS_SELECTOR, 'p.Price_price__APlgs').text,
+                'mileage': listing.find_element(By.CSS_SELECTOR, '[data-testid="VehicleDetails-mileage_road"]').text,
+                'registration_date': listing.find_element(By.CSS_SELECTOR,
+                                                          '[data-testid="VehicleDetails-calendar"]').text,
+                'horsepower': listing.find_element(By.CSS_SELECTOR, '[data-testid="VehicleDetails-speedometer"]').text
+            }
+
             if car_url in cache:
                 print("Found a duplicate URL in the cache. Stopping the process.")
                 return False
             else:
-                cache.add(car_url)
-                print(f"Added URL to cache: {car_url}")
-        print("All unique URLs have been added to the cache.")
+                cache[car_url] = car_details
+                print(f"Added car to cache: {car_url} with details: {car_details}")
+        print("All unique car details have been added to the cache.")
         return True
     except Exception as e:
         print(f"An error occurred while populating the cache: {e}")
@@ -78,7 +87,6 @@ def check_url():
 
         page_number += 1
         print(f"Moving to page {page_number}")
-
 
 
 def main():
