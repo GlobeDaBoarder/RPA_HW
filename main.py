@@ -15,6 +15,9 @@ import json
 # Global cache to store URLs of car listings
 cache = {}
 
+# Flag to indicate stop requested
+stop_requested = False
+
 # Initialize the Chrome driver outside of the function to keep it alive
 options = Options()
 options.add_argument('--headless')  # Run Chrome in headless mode (no GUI)
@@ -26,11 +29,12 @@ driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), opti
 
 
 def listen_for_exit_command():
+    global stop_requested
     while True:
-        if input() == 'q':
-            print("Exiting...")
-            driver.quit()
-            sys.exit()
+        if input("Press 'q' to quit: ").strip().lower() == 'q':
+            print("Exit requested...")
+            stop_requested = True
+            break
 
 
 def send_telegram_message(text):
@@ -145,16 +149,16 @@ def main():
     exit_thread.daemon = True
     exit_thread.start()
 
-    print("ENTER \"Q\" TO STOP THE PROGRAM!!!")
-    time.sleep(3)
+    load_cache()
     try:
-        load_cache()
-        while True:
+        while not stop_requested:
             if not check_url():
                 break
             time.sleep(60)  # check next time in minute
     finally:
+        print("Cleaning up...")
         driver.quit()
+        print("Driver quit. Program terminated.")
 
 
 if __name__ == "__main__":
