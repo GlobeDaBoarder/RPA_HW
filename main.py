@@ -135,9 +135,9 @@ def main():
         while True:
             if not check_url():
                 break
-            time.sleep(10)  # Wait for 5 seconds before the next call
+            time.sleep(60)  # check next time in minute
     finally:
-        driver.quit()  # Ensure the driver is quit when the script ends
+        driver.quit()
 
 
 if __name__ == "__main__":
