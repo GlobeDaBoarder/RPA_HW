@@ -6,7 +6,9 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
+import telepot
 import json
+
 
 # Global cache to store URLs of car listings
 cache = {}
@@ -21,10 +23,17 @@ options.add_argument('--disable-dev-shm-usage')
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 
+def send_telegram_message(text):
+    token = '6996244061:AAHZNbYgCIo-Tjx8DrAK-SPxZfGHLaEpWak'
+    chat_id = '407569859'
+    bot = telepot.Bot(token)
+    bot.sendMessage(chat_id=chat_id, text=text)
+
+
 def save_cache():
     try:
         with open('car_cache.json', 'w') as f:
-            json.dump(cache, f, indent=4)  # Set indent level to 4 spaces
+            json.dump(cache, f, indent=4)
         print("Cache saved successfully.")
     except IOError as e:
         print(f"Failed to save cache: {e}")
@@ -77,16 +86,19 @@ def populate_cache():
 
             if car_url in cache:
                 if cache[car_url] != car_details:
-                    # Check if any details have changed
-                    cache[car_url] = car_details
-                    print(f"Updated car in cache: {car_url} with new details: {car_details}")
                     is_something_added_or_updated = True
+                    cache[car_url] = car_details
+                    update_message = f"Updated {car_details['name']} in cache: {car_url} with new details: {car_details}"
+                    print(update_message)
+                    send_telegram_message(update_message)
                 else:
                     print(f"No changes detected for {car_url}.")
             else:
-                cache[car_url] = car_details
-                print(f"Added car to cache: {car_url} with details: {car_details}")
                 is_something_added_or_updated = True
+                cache[car_url] = car_details
+                addition_message = f"Added {car_details['name']} to cache: {car_url} with details: {car_details}"
+                print(addition_message)
+                send_telegram_message(addition_message)
 
         if is_something_added_or_updated:
             save_cache()
