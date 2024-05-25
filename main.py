@@ -6,6 +6,8 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
+import threading
+import sys
 import telepot
 import json
 
@@ -21,6 +23,14 @@ options.add_argument('--no-sandbox')
 options.add_argument('--disable-dev-shm-usage')
 
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
+
+def listen_for_exit_command():
+    while True:
+        if input() == 'q':
+            print("Exiting...")
+            driver.quit()
+            sys.exit()
 
 
 def send_telegram_message(text):
@@ -130,6 +140,13 @@ def check_url():
 
 
 def main():
+    # Start a thread that listens for the 'q' command
+    exit_thread = threading.Thread(target=listen_for_exit_command)
+    exit_thread.daemon = True
+    exit_thread.start()
+
+    print("ENTER \"Q\" TO STOP THE PROGRAM!!!")
+    time.sleep(3)
     try:
         load_cache()
         while True:
